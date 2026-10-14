@@ -192,37 +192,61 @@ export const register: Register = (on, options) => {
       return (
         <Box flexDirection="column">
           {below}
-          <Box marginTop={1}>
-            <Text dimColor>next steps…</Text>
+          <Box marginTop={1} marginLeft={1}>
+            <Text color="suggestion">✦ </Text>
+            <Text dimColor italic>thinking of next steps…</Text>
           </Box>
         </Box>
       )
     }
 
     const items = view.items
+    const choose = (item: Suggestion): void => {
+      show($, { kind: 'hidden' })
+      void $.prompt.fill({ text: item.prompt }).then(
+        r => r.isFilled || $.ui.toast('could not fill the prompt box'),
+        error => $.ui.toast(`could not fill: ${String(error)}`),
+      )
+    }
     return (
       <Box flexDirection="column">
         {below}
-        <Box marginTop={1} />
-        <Text dimColor>next:</Text>
-        {items.map((item, index) => (
-          <Box key={`s${index}`} marginLeft={2}>
-            <Button
-              hotkey={String(index + 1)}
-              plain
-              label={item.label}
-              onPress={() => {
-                show($, { kind: 'hidden' })
-                void $.prompt.fill({ text: item.prompt }).then(
-                  r => r.isFilled || $.ui.toast('could not fill the prompt box'),
-                  error => $.ui.toast(`could not fill: ${String(error)}`),
-                )
-              }}
-            />
+        <Box
+          marginTop={1}
+          flexDirection="column"
+          borderStyle="round"
+          borderColor="suggestion"
+          borderDimColor
+          paddingX={1}
+        >
+          <Box justifyContent="space-between">
+            <Text color="suggestion" bold>✦ next steps</Text>
+            <Button dimColor role="dismiss" label="dismiss" onPress={() => show($, { kind: 'hidden' })} />
           </Box>
-        ))}
-        <Box marginLeft={2}>
-          <Button hotkey="0" plain label="dismiss" onPress={() => show($, { kind: 'hidden' })} />
+          {items.map((item, index) => (
+            <Box key={`s${index}`}>
+              <Box width={3}>
+                <Text color="suggestion" bold>{String(index + 1)}</Text>
+              </Box>
+              <Button label={item.label} onPress={() => choose(item)}>
+                <Text>{item.label}</Text>
+              </Button>
+            </Box>
+          ))}
+          <Box display="none">
+            <Button hotkey="0" label="dismiss" onPress={() => show($, { kind: 'hidden' })} />
+            {items.map((item, index) => (
+              <Button key={`h${index}`} hotkey={String(index + 1)} label={`pick ${index + 1}`} onPress={() => choose(item)} />
+            ))}
+          </Box>
+          <Box>
+            <Text color="suggestion" bold>1-3</Text>
+            <Text dimColor italic> draft it · </Text>
+            <Text color="suggestion" bold>Tab</Text>
+            <Text dimColor italic> takes 1 · </Text>
+            <Text color="suggestion" bold>0</Text>
+            <Text dimColor italic> dismisses</Text>
+          </Box>
         </Box>
       </Box>
     )
